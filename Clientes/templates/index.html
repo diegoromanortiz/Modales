@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  {% include "_modal.html" %}
+
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col">
+        <p class="text-primary">A jQuery plugin for creating AJAX driven Django forms in Bootstrap modal.</p>
+        <h4>
+          <strong>1. Signup form</strong>
+        </h4>
+        <p>Sign up via Bootstrap modal.</p>
+        <div class="row">
+          <div class="col-12 mb-3">
+            <button id="signup-btn" class="btn btn-primary" type="button" name="button">Sign up</button>
+          </div>
+        </div>
+        <h4>
+          <strong>2. Login form</strong>
+        </h4>
+        <p>Log in via Bootstrap modal. Sign up first.</p>
+        <div class="row">
+          <div class="col-12 mb-3">
+            {% if not user.is_anonymous %}
+              <span>
+                Your are logged in as
+                <strong>{{ user }}</strong>.
+              </span>
+              <a href="{% url 'logout' %}" id="logout-btn" class="btn btn-danger" role="button">Log out</a>
+            {% else %}
+              <button id="login-btn" class="btn btn-primary" type="button" name="button">Log in</button>
+            {% endif %}
+          </div>
+
+        </div>
+        <h4>
+          <strong>3. CRUD actions</strong>
+        </h4>
+        <p>Create, Read, Update and Delete books in Bootstrap modal.</p>
+
+        <div class="row">
+          <div class="col-12 mb-3">
+            {% if perms.django_bootstrap_modal_forms.add_client %}
+            <button id="create-client-fem" class="btn btn-primary" type="button" name="button">
+              <span class="fa fa-plus mr-2"></span>Create client - Feminine
+            </button>
+            <button id="create-client-mal" class="btn btn-primary" type="button" name="button">
+              <span class="fa fa-plus mr-2"></span>Create client-Male 
+            </button>
+            {% endif %}
+            <button id="filter-client" class="filter-book btn btn-primary" type="button" name="button" data-form-url="{% url 'filter_client' %}">
+              <span class="fa fa-filter mr-2"></span>Filter clients
+            </button>
+          </div>
+          <div class="col-12 mb-3">
+          {% if 'type' in request.GET %}
+            <p class="filtered-clients">Filtered clients.</p>
+          {% endif %}
+          {% include "_clients_table.html" %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+{% block extrascripts %}
+  <script type="text/javascript">
+      $(function () {
+          // Login
+          $("#login-btn").modalForm({
+            formURL: "{% url 'login' %}"
+          });
+
+          //  Signup
+          $("#signup-btn").modalForm({
+            formURL: "{% url 'signup' %}"
+          });
+
+          // Create client - Feminine
+          function createClientFemModalForm() {
+            $("#create-client-fem").modalForm({
+                formURL: "{% url 'create_client' %}",
+                modalID: "#create-modal"
+            });
+          }
+          createClientFemModalForm();
+
+          // Create book asynchronous button
+          // message
+          var ClientFemSuccessMessageCreate = [
+            "<div ",
+            "style='position:fixed;top:0;z-index:10000;width:100%;border-radius:0;' ",
+            "class='alert alert-icon alert-success alert-dismissible fade show mb-0' role='alert'>",
+            "Success: Client was created.",
+            "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>",
+            "<span aria-hidden='true'>&times;</span>",
+            "</button>",
+            "</div>",
+            "<script>",
+            "$('.alert').fadeTo(2000, 500).slideUp(500, function () {$('.alert').slideUp(500).remove();});",
+            "<\/script>"
+          ].join("");
+
+          // modal form
+          function createClientMalModalForm() {
+            $("#create-client-mal").modalForm({
+                formURL: "{% url 'create_client' %}",
+                modalID: "#create-modal",
+                asyncUpdate: true,
+                asyncSettings: {
+                  closeOnSubmit: true,
+                  successMessage: ClientFemSuccessMessageCreate,
+                  dataUrl: "clientes/",
+                  dataElementId: "#clients-table",
+                  dataKey: "table",
+                  addModalFormFunction: reinstantiateModalForms
+                }
+            });
+          }
+          createClientMalModalForm();
+
+          // Update book asynchronous button
+          // message
+          var ClientFemSuccessMessageUpdate = [
+            "<div ",
+            "style='position:fixed;top:0;z-index:10000;width:100%;border-radius:0;' ",
+            "class='alert alert-icon alert-success alert-dismissible fade show mb-0' role='alert'>",
+            "Success: Client was updated.",
+            "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>",
+            "<span aria-hidden='true'>&times;</span>",
+            "</button>",
+            "</div>",
+            "<script>",
+            "$('.alert').fadeTo(2000, 500).slideUp(500, function () {$('.alert').slideUp(500).remove();});",
+            "<\/script>"
+          ].join("");
+
+          // modal form
+          function updateClientModalForm() {
+            $(".update-client").each(function () {
+              $(this).modalForm({
+                formURL: $(this).data("form-url"),
+                asyncUpdate: true,
+                asyncSettings: {
+                  closeOnSubmit: true,
+                  successMessage: ClientFemSuccessMessageUpdate,
+                  dataUrl: "clientes/",
+                  dataElementId: "#clients-table",
+                  dataKey: "table",
+                  addModalFormFunction: reinstantiateModalForms
+                }
+              });
+            });
+          }
+          updateClientModalForm();
+
+          // Delete book buttons - formURL is retrieved from the data of the element
+          function deleteClientModalForm() {
+            $(".delete-client").each(function () {
+                $(this).modalForm({formURL: $(this).data("form-url"), isDeleteForm: true});
+            });
+          }
+          deleteClientModalForm();
+
+          // Read book buttons
+          function readClientModalForm() {
+            $(".read-client").each(function () {
+                $(this).modalForm({formURL: $(this).data("form-url")});
+            });
+          }
+          readClientModalForm();
+
+          function reinstantiateModalForms() {
+            createClientMalModalForm();
+            readClientModalForm();
+            updateClientModalForm();
+            deleteClientModalForm();
+          }
+
+          // Filter books button
+          $("#filter-client").each(function () {
+              $(this).modalForm({formURL: $(this).data("form-url")});
+          });
+
+          // Hide message
+          $(".alert").fadeTo(2000, 500).slideUp(500, function () {
+              $(".alert").slideUp(500);
+          });
+      });
+  </script>
+{% endblock extrascripts %}

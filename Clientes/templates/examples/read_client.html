@@ -1,0 +1,41 @@
+{% load widget_tweaks %}
+
+<div class="modal-header">
+  <h3 class="modal-title">Client details</h3>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+
+<div class="modal-body">
+  
+  <div class="">
+    Name:
+    {{ object.nombre}}
+  </div>
+  <div class="">
+    Surname:
+    {{ object.apellido}}
+  </div>
+  <div class="">
+    Phone:
+    {{ object.telefono }}
+  </div>
+  <div class="">
+    Email:
+    {{ object.email }}
+  </div>
+  <div class="">
+    Address:
+    {{ object.direccion }}
+  </div>
+  <div class="">
+    Gener: 
+    {{ object.type_genero }}
+  </div>
+
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+</div>
